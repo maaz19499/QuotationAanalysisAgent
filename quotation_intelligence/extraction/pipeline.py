@@ -87,12 +87,12 @@ class ExtractionPipeline:
 
             # Step 2: Regex extraction
             full_text = self.pdf_parser.get_full_text(pages)
-            regex_candidates = self.regex_extractor.extract(full_text)
+            # regex_candidates = self.regex_extractor.extract(full_text)
 
             # Step 3: LLM extraction
             extraction_result = await self._extract_with_llm(
                 full_text,
-                regex_candidates,
+                # regex_candidates,
                 pages,
             )
 
@@ -293,8 +293,6 @@ class ExtractionPipeline:
 
         # Extract
         full_text = self.pdf_parser.get_full_text(pages)
-        logger.info("full_text", full_text=full_text)
-
         # regex_candidates = self.regex_extractor.extract(full_text)
 
         # LLM extraction with fallback
