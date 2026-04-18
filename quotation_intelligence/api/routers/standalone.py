@@ -159,9 +159,14 @@ async def extract_sync(
             status=result_status.value,
         )
 
+        from quotation_intelligence.extraction.excel_exporter import generate_crm_pre_qt_excel
+        
+        excel_bytes = generate_crm_pre_qt_excel(result.to_export_dict())
+        excel_b64 = base64.b64encode(excel_bytes).decode('utf-8')
+
         return SyncExtractionResponse(
             status=result_status,
-            data=result.to_export_dict(),
+            data=excel_b64,
             confidence_summary=confidence_summary,
             processing_time_seconds=round(processing_time, 2),
             extraction_errors=result.extraction_errors or [],

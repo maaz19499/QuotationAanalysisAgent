@@ -224,7 +224,7 @@ class SyncExtractionResponse(BaseModel):
     """Response for synchronous extraction (standalone mode, no database)."""
 
     status: ProcessingStatus
-    data: dict[str, Any]
+    data: str | dict[str, Any]
     confidence_summary: ExtractionSummary
     processing_time_seconds: float
     extraction_errors: list[str]

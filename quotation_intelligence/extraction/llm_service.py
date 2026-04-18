@@ -282,13 +282,14 @@ Call the `structure_quotation` tool with the extracted values.
                 **({"api_base": settings.llm_api_base} if settings.llm_api_base else {}),
             )
 
-            raw = response.choices[0].message.content
+            # raw = response.choices[0].message.content
+            # raw = response.choices[0].message.tool_calls
+            logger.info("raw_parsed", raw_parsed=raw)
 
             # Strip markdown fences if model adds them anyway
             clean = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
             raw_parsed = json.loads(clean)
             # return json.loads(clean)
-            logger.info("raw_parsed", raw_parsed=raw_parsed)
 
             # raw_parsed = self._parse_tool_response(response)
             canonical = self._normalizer.normalize(raw_parsed)
