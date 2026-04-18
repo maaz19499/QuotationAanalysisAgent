@@ -45,9 +45,9 @@ class DocumentUploadBase64(BaseModel):
     @field_validator("file_name")
     @classmethod
     def validate_file_name(cls, v: str) -> str:
-        """Validate file name ends with .pdf."""
+        """Validate file name ends with .pdf, append if missing."""
         if not v.lower().endswith(".pdf"):
-            raise ValueError("File must be a PDF")
+            return f"{v}.pdf"
         return v
 
 

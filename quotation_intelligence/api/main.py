@@ -11,7 +11,7 @@ from quotation_intelligence.api import routers
 from quotation_intelligence.core.config import settings
 from quotation_intelligence.core.logging_config import configure_logging, get_logger
 
-if settings.sentry_dsn:
+if settings.environment == "production" and settings.sentry_dsn:
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
         traces_sample_rate=1.0 if settings.environment == "production" else 0.1,

@@ -61,6 +61,8 @@ async def extract_sync(
     temp_file_path: str | None = None
 
     try:
+        logger.info("Standalone request received")
+        logger.info("request_data", request_data=request_data)
         # Handle file upload
         if request_data.base64_upload:
             upload = request_data.base64_upload
@@ -73,7 +75,7 @@ async def extract_sync(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Invalid base64 encoding: {e}",
                 ) from e
-
+            logger.info("decoded", decoded=decoded)
             # Validate and save to temp file
             storage = StorageService()
             storage.validate_file(decoded, upload.file_name, "application/pdf")
