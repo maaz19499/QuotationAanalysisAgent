@@ -272,8 +272,8 @@ Call the `structure_quotation` tool with the extracted values.
                     {"role": "system", "content": self.SYSTEM_PROMPT},
                     {"role": "user", "content": user_prompt},
                 ],
-                # tools=[self.EXTRACTION_TOOL],
-                # tool_choice={"type": "function", "function": {"name": "structure_quotation"}},
+                tools=[self.EXTRACTION_TOOL],
+                tool_choice={"type": "function", "function": {"name": "structure_quotation"}},
                 # max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 timeout=self.timeout,
@@ -282,16 +282,8 @@ Call the `structure_quotation` tool with the extracted values.
                 **({"api_base": settings.llm_api_base} if settings.llm_api_base else {}),
             )
 
-            # raw = response.choices[0].message.content
-            # raw = response.choices[0].message.tool_calls
-            logger.info("raw_parsed", raw_parsed=raw)
-
-            # Strip markdown fences if model adds them anyway
-            clean = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-            raw_parsed = json.loads(clean)
-            # return json.loads(clean)
-
-            # raw_parsed = self._parse_tool_response(response)
+            raw_parsed = self._parse_tool_response(response)
+            logger.info("raw_parsed", raw_parsed=raw_parsed)
             canonical = self._normalizer.normalize(raw_parsed)
             result = QuotationExtracted.model_validate(canonical)
 
@@ -394,7 +386,21 @@ Call the `structure_quotation` tool with the extracted values.
             hint="Model may not support tool calling; using text content fallback",
         )
         content = message.content or ""
-        return self._parse_response(content)
+        parsed = self._parse_response(content)
+        
+        # Sometimes models don't invoke native tools, but manually inline
+        # the exact OpenAI interface (e.g., {"name": "func", "arguments": {...}})
+        if isinstance(parsed, dict) and "arguments" in parsed and "name" in parsed:
+            # Safely unwrap if inner arguments are double-stringified
+            if isinstance(parsed["arguments"], str):
+                import json
+                try:
+                    return json.loads(parsed["arguments"])
+                except json.JSONDecodeError:
+                    return parsed["arguments"]
+            return parsed["arguments"]
+            
+        return parsed
 
     def _parse_response(self, content: str) -> Any:
         """Parse JSON from LLM response, handling markdown code fences."""
