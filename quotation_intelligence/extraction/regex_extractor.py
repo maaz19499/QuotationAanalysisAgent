@@ -193,17 +193,17 @@ class RegexExtractor:
             "description": "description",
             "desc": "description",
             "details": "description",
-            "item\s+description": "description",
+            "item+description": "description",
             "qty": "quantity",
             "quantity": "quantity",
             "unit": "unit_of_measure",
             "uom": "unit_of_measure",
             "price": "unit_price",
-            "unit\s*price": "unit_price",
+            "unit*price": "unit_price",
             "rate": "unit_price",
             "amount": "total_price",
             "total": "total_price",
-            "line\s*total": "total_price",
+            "line*total": "total_price",
         }
 
         for header in headers:
