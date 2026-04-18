@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: quotation_user
+      POSTGRES_PASSWORD: quotation_pass
+      POSTGRES_DB: quotation_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quotation_user -d quotation_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # API server
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://quotation_user:quotation_pass@db:5432/quotation_db
+      - REDIS_URL=redis://redis:6379/0
+      - STORAGE_LOCAL_PATH=/app/uploads
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/app
+      - /app/.venv  # Preserve virtual environment
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn quotation_intelligence.api.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Celery worker
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://quotation_user:quotation_pass@db:5432/quotation_db
+      - REDIS_URL=redis://redis:6379/0
+      - STORAGE_LOCAL_PATH=/app/uploads
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/app
+      - /app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "celery -A quotation_intelligence.tasks worker --loglevel=info --concurrency=2"
+
+  # Celery beat (for scheduled tasks)
+  beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://quotation_user:quotation_pass@db:5432/quotation_db
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=development
+    env_file:
+      - ../.env
+    volumes:
+      - ../:/app
+      - /app/.venv
+    depends_on:
+      - db
+      - redis
+    command: >
+      sh -c "celery -A quotation_intelligence.tasks beat --loglevel=info"
+
+  # Flower (Celery monitoring)
+  flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: development
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    command: >
+      sh -c "celery -A quotation_intelligence.tasks flower --port=5555"
+
+volumes:
+  postgres_data:
+  redis_data:

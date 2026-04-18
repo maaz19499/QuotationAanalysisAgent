@@ -1,0 +1,76 @@
+# Application
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=INFO
+
+# API
+API_HOST=0.0.0.0
+API_PORT=8000
+API_WORKERS=1
+
+# Database
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/quotation_db
+DATABASE_POOL_SIZE=10
+
+# Redis (Celery)
+REDIS_URL=redis://localhost:6379/0
+
+# Storage (local or s3)
+STORAGE_TYPE=local
+STORAGE_LOCAL_PATH=./uploads
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM — powered by LiteLLM (universal gateway to any LLM provider)
+#
+# Set LLM_MODEL to any provider/model string:
+#
+#   Provider        | Example model string
+#   ────────────────|──────────────────────────────────────────
+#   Anthropic       | anthropic/claude-3-5-sonnet-20241022
+#   OpenAI          | openai/gpt-4o
+#   Ollama (local)  | ollama/llama3.2   (also set LLM_API_BASE)
+#   Groq            | groq/llama3-70b-8192
+#   Google Gemini   | gemini/gemini-1.5-pro
+#   AWS Bedrock     | bedrock/anthropic.claude-3-sonnet-20240229-v1:0
+#   Azure OpenAI    | azure/my-gpt4-deployment
+#
+# Full list: https://docs.litellm.ai/docs/providers
+# ─────────────────────────────────────────────────────────────────────────────
+LLM_MODEL=anthropic/claude-3-5-sonnet-20241022
+
+# Generic API key — only needed if your provider uses a non-standard env var.
+# Leave blank and use the provider-specific keys below instead (recommended).
+LLM_API_KEY=
+
+# Custom base URL — required for self-hosted/local providers (e.g. Ollama).
+# Example: http://localhost:11434
+LLM_API_BASE=
+
+LLM_MAX_TOKENS=4096
+LLM_TEMPERATURE=0.0
+LLM_TIMEOUT_SECONDS=60
+
+# ── Provider-specific API keys (LiteLLM reads these automatically) ──────────
+ANTHROPIC_API_KEY=sk-ant-api03-...
+# OPENAI_API_KEY=sk-...
+# GROQ_API_KEY=gsk_...
+# GEMINI_API_KEY=...
+# COHERE_API_KEY=...
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Processing
+MAX_FILE_SIZE_MB=10
+MAX_PAGES_PER_PDF=50
+ENABLE_OCR_FALLBACK=true
+
+# Security
+SECRET_KEY=your-secret-key-change-in-production
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+# Monitoring
+ENABLE_PROMETHEUS=true
+SENTRY_DSN=
