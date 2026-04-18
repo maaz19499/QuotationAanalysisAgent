@@ -99,8 +99,8 @@ def main() -> None:
 
     uvicorn.run(
         "quotation_intelligence.api.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
+        host=settings.host,
+        port=settings.port,
         # workers=settings.api_workers,
         reload=settings.debug,
     )

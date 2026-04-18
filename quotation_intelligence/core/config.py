@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     environment: Literal["development", "staging", "production"] = "development"
 
     # API
-    api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    host: str = "0.0.0.0"
+    port: int = 8000
     api_workers: int = 1
 
     # Database
