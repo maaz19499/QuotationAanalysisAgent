@@ -1,14 +1,14 @@
 """Data models - database and schemas."""
 
-from quotation_intelligence.models.database import (
+from quotation_core.models.database import (
     Document,
     ExtractionConfidence,
     ExtractionResult,
     LineItem,
     ProcessingStatus,
 )
-from quotation_intelligence.models.extraction import LineItemExtracted, QuotationExtracted
-from quotation_intelligence.models.schemas import (
+from quotation_core.models.extraction import LineItemExtracted, QuotationExtracted
+from quotation_core.models.schemas import (
     DocumentDetailResponse,
     DocumentResponse,
     DocumentUploadBase64,

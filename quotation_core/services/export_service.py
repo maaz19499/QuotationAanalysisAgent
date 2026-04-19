@@ -9,8 +9,8 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.models.database import Document, ExtractionResult, LineItem
+from quotation_core.core.logging_config import get_logger
+from quotation_core.models.database import Document, ExtractionResult, LineItem
 
 logger = get_logger(__name__)
 

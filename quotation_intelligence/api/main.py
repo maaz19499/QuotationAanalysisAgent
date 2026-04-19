@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from quotation_intelligence.api import routers
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import configure_logging, get_logger
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import configure_logging, get_logger
 
 if settings.environment == "production" and settings.sentry_dsn:
     sentry_sdk.init(
@@ -90,7 +90,6 @@ async def health_check() -> dict:
 app.include_router(routers.documents.router, prefix="/api/v1/documents", tags=["Documents"])
 app.include_router(routers.exports.router, prefix="/api/v1/exports", tags=["Exports"])
 app.include_router(routers.health.router, prefix="/api/v1/health", tags=["Health"])
-app.include_router(routers.standalone.router, prefix="/api/v1/standalone", tags=["Standalone (No DB)"])
 
 
 def main() -> None:

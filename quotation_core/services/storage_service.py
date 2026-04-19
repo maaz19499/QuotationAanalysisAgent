@@ -9,8 +9,8 @@ from uuid import uuid4
 import boto3
 from botocore.exceptions import ClientError
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -148,19 +148,26 @@ class StorageService:
         if self.storage_type == "s3" and self.s3_client:
             return self._save_to_s3(content, unique_file_name)
         else:
-            # Copy to local storage
-            dest_path = self.local_path / unique_file_name
+            # Copy to local storage workspace
+            workspace_dir = self.local_path / unique_id
+            workspace_dir.mkdir(parents=True, exist_ok=True)
+            dest_path = workspace_dir / unique_file_name
             shutil.copy(source, dest_path)
             return str(dest_path)
 
     def _save_to_local(self, content: bytes, file_name: str) -> str:
-        """Save file to local filesystem."""
-        file_path = self.local_path / file_name
+        """Save file to local filesystem inside a dedicated workspace."""
+        # Create a workspace folder using the unique ID part of the filename
+        workspace_id = file_name.split("_")[0]
+        workspace_dir = self.local_path / workspace_id
+        workspace_dir.mkdir(parents=True, exist_ok=True)
+        
+        file_path = workspace_dir / file_name
 
         with open(file_path, "wb") as f:
             f.write(content)
 
-        logger.info("file_saved_local", path=str(file_path), size=len(content))
+        logger.info("file_saved_local_workspace", path=str(file_path), size=len(content))
         return str(file_path)
 
     def _save_to_s3(

@@ -2,8 +2,8 @@
 import re
 from typing import Any
 
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.models.extraction import LineItemExtracted, QuotationExtracted
+from quotation_core.core.logging_config import get_logger
+from quotation_core.models.extraction import LineItemExtracted, QuotationExtracted
 
 logger = get_logger(__name__)
 

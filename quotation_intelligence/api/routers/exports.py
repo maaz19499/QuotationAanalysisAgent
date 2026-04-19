@@ -5,11 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from quotation_intelligence.api.routers.documents import verify_api_key
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.models.database import get_db_session
-from quotation_intelligence.models.schemas import ExportFormat
-from quotation_intelligence.services.export_service import ExportService
+from quotation_core.core.security import verify_api_key
+from quotation_core.core.logging_config import get_logger
+from quotation_core.models.database import get_db_session
+from quotation_core.models.schemas import ExportFormat
+from quotation_core.services.export_service import ExportService
 
 logger = get_logger(__name__)
 router = APIRouter()

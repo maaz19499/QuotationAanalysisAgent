@@ -9,8 +9,8 @@ import pymupdf4llm
 import pytesseract
 from PIL import Image
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 

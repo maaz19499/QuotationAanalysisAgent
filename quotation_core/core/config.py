@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     # Storage
     storage_type: Literal["local", "s3"] = "local"
-    storage_local_path: str = "./uploads"
+    storage_local_path: str = "./temp"
     aws_access_key_id: str | None = None
     aws_secret_access_key: str | None = None
     aws_region: str = "us-east-1"

@@ -8,7 +8,7 @@ from sqlalchemy import JSON, DateTime, Enum, Float, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from quotation_intelligence.core.config import settings
+from quotation_core.core.config import settings
 
 engine = create_async_engine(
     settings.database_url,

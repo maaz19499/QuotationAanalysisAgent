@@ -2,15 +2,15 @@
 from celery import Task
 from celery.exceptions import SoftTimeLimitExceeded
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.extraction.pipeline import ExtractionPipeline
-from quotation_intelligence.models.database import (
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
+from quotation_core.extraction.pipeline import ExtractionPipeline
+from quotation_core.models.database import (
     AsyncSessionLocal,
     Document,
     ProcessingStatus,
 )
-from quotation_intelligence.models.extraction import QuotationExtracted
+from quotation_core.models.extraction import QuotationExtracted
 from quotation_intelligence.tasks.celery_app import celery_app
 
 logger = get_logger(__name__)
@@ -50,11 +50,28 @@ def process_document_task(self: DatabaseTask, document_id: str, file_path: str) 
         result = loop.run_until_complete(
             _async_process_document(document_id, file_path)
         )
+        
+        import shutil
+        from pathlib import Path
+        try:
+            # Delete DB workflow workspace when finished successfully!
+            shutil.rmtree(Path(file_path).parent)
+        except Exception as e:
+            logger.error(f"Failed to delete DB workspace {file_path}: {e}")
+            
         return result
 
     except SoftTimeLimitExceeded:
         logger.error("processing_soft_time_limit_exceeded", document_id=document_id)
         loop.run_until_complete(_mark_failed(document_id, "Processing timeout"))
+        
+        import shutil
+        from pathlib import Path
+        try:
+            shutil.rmtree(Path(file_path).parent)
+        except Exception:
+            pass
+            
         raise
 
     except Exception as exc:
@@ -75,6 +92,14 @@ def process_document_task(self: DatabaseTask, document_id: str, file_path: str) 
             )
         else:
             loop.run_until_complete(_mark_failed(document_id, f"Max retries exceeded: {exc}"))
+            
+            import shutil
+            from pathlib import Path
+            try:
+                shutil.rmtree(Path(file_path).parent)
+            except Exception:
+                pass
+                
             raise
 
     finally:
@@ -155,7 +180,7 @@ def cleanup_old_documents(older_than_days: int = 30) -> dict:
 
         from sqlalchemy import delete
 
-        from quotation_intelligence.models.database import Document, ProcessingStatus
+        from quotation_core.models.database import Document, ProcessingStatus
 
         cutoff_date = datetime.utcnow() - timedelta(days=older_than_days)
 

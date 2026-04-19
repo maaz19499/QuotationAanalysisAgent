@@ -4,8 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from quotation_intelligence.api.routers.documents import verify_api_key
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.models.database import get_db_session
+from quotation_core.core.config import settings
+from quotation_core.models.database import get_db_session
 
 router = APIRouter()
 

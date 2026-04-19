@@ -4,7 +4,7 @@ import sys
 
 import structlog
 
-from quotation_intelligence.core.config import settings
+from quotation_core.core.config import settings
 
 
 def configure_logging() -> None:

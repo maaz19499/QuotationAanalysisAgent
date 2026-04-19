@@ -6,21 +6,21 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.extraction.llm_service import LLMExtractionError, LLMService
-from quotation_intelligence.extraction.pdf_parser import PDFParser
-from quotation_intelligence.extraction.post_processor import PostProcessor
-from quotation_intelligence.extraction.regex_extractor import RegexExtractor
-from quotation_intelligence.models.database import (
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
+from quotation_core.extraction.llm_service import LLMExtractionError, LLMService
+from quotation_core.extraction.pdf_parser import PDFParser
+from quotation_core.extraction.post_processor import PostProcessor
+from quotation_core.extraction.regex_extractor import RegexExtractor
+from quotation_core.models.database import (
     Document,
     ExtractionConfidence,
     ExtractionResult,
     LineItem,
     ProcessingStatus,
 )
-from quotation_intelligence.models.extraction import QuotationExtracted
-from quotation_intelligence.models.schemas import LineItemCreate
+from quotation_core.models.extraction import QuotationExtracted
+from quotation_core.models.schemas import LineItemCreate
 
 logger = get_logger(__name__)
 
@@ -92,8 +92,6 @@ class ExtractionPipeline:
             # Step 3: LLM extraction
             extraction_result = await self._extract_with_llm(
                 full_text,
-                # regex_candidates,
-                pages,
             )
 
             # Step 4: Post-processing
@@ -153,13 +151,11 @@ class ExtractionPipeline:
     async def _extract_with_llm(
         self,
         text: str,
-        regex_candidates: dict[str, Any],
-        pages: list,
     ) -> QuotationExtracted:
         """Extract structured data using LLM with fallback."""
         if self.enable_llm and self.llm_service.client:
             try:
-                result = self.llm_service.extract_quotation(text, regex_candidates)
+                result = self.llm_service.extract_quotation(text)
                 return result
             except LLMExtractionError as e:
                 logger.warning("llm_extraction_failed", error=str(e))
@@ -300,9 +296,10 @@ class ExtractionPipeline:
             try:
                 result = self.llm_service.extract_quotation(full_text)
             except LLMExtractionError:
-                result = self.llm_service.fallback_extraction(full_text)
+                result = self.llm_service.extract_quotation(full_text)
         else:
-            result = self.llm_service.fallback_extraction(full_text)
+            raise ValueError("LLM is not enabled or not configured")
+            # result = self.llm_service.fallback_extraction(full_text)
 
         # Post-process
         # return self.post_processor.process(result)

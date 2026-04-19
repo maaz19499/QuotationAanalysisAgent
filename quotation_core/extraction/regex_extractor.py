@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from quotation_intelligence.core.logging_config import get_logger
+from quotation_core.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 

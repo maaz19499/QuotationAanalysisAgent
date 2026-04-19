@@ -9,10 +9,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.models.database import Document, ProcessingStatus, get_db_session
-from quotation_intelligence.models.schemas import (
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
+from quotation_core.models.database import Document, ExtractionResult, ProcessingStatus, get_db_session
+from quotation_core.models.schemas import (
     DocumentDetailResponse,
     DocumentResponse,
     DocumentUploadBase64,
@@ -21,7 +21,7 @@ from quotation_intelligence.models.schemas import (
     ErrorResponse,
     ProcessingResponse,
 )
-from quotation_intelligence.services.storage_service import (
+from quotation_core.services.storage_service import (
     FileValidationError,
     StorageError,
     StorageService,
@@ -32,30 +32,7 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-def verify_api_key(request: Request) -> str:
-    """Verify API key from header."""
-    api_key = request.headers.get(settings.api_key_header)
-
-    # In development, allow missing API keys
-    if settings.environment == "development" and not api_key:
-        return "dev-key"
-
-    if not api_key:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="API key required",
-        )
-
-    # Validate API key (in production, check against database)
-    if settings.environment == "production":
-        # TODO: Validate against stored keys
-        if api_key != settings.secret_key:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key",
-            )
-
-    return api_key
+from quotation_core.core.security import verify_api_key
 
 
 @router.post(
@@ -260,3 +237,76 @@ async def reprocess_document(
         status=ProcessingStatus.PENDING,
         message="Document re-queued for processing",
     )
+
+
+@router.get(
+    "/{document_id}/export/excel",
+    response_model=dict,
+)
+async def export_document_excel(
+    document_id: UUID,
+    db_session: AsyncSession = Depends(get_db_session),
+    api_key: str = Depends(verify_api_key),
+) -> dict:
+    """Export document extraction results to Excel."""
+    from sqlalchemy.orm import selectinload
+
+    result = await db_session.execute(
+        select(Document)
+        .options(selectinload(Document.extraction_result).selectinload(ExtractionResult.line_items))
+        .where(Document.id == document_id)
+    )
+    document = result.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
+
+    if not document.extraction_result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Document extraction is not yet complete",
+        )
+
+    # Reconstruct data dictionary to match what to_export_dict() returns
+    extraction = document.extraction_result
+    
+    export_dict = {
+        "supplier_name": extraction.supplier_name,
+        "quotation_number": extraction.quotation_number,
+        "quotation_date": extraction.quotation_date,
+        "currency": extraction.currency,
+        "subtotal": extraction.subtotal,
+        "tax_amount": extraction.tax_amount,
+        "total_amount": extraction.total_amount,
+        "line_items": [
+            {
+                "line_number": item.line_number,
+                "product_code": item.product_code,
+                "description": item.description,
+                "quantity": item.quantity,
+                "unit_of_measure": item.unit_of_measure,
+                "unit_price": item.unit_price,
+                "total_price": item.total_price,
+            }
+            for item in extraction.line_items
+        ],
+        "metadata": {
+            "line_item_count": len(extraction.line_items),
+            "extraction_errors": extraction.extraction_errors or [],
+        },
+    }
+
+    try:
+        from quotation_core.extraction.excel_exporter import generate_crm_pre_qt_excel
+        excel_bytes = generate_crm_pre_qt_excel(export_dict)
+        excel_b64 = base64.b64encode(excel_bytes).decode('utf-8')
+        return {"filename": f"{document.file_name}_export.xlsx", "excel_base64": excel_b64}
+    except Exception as e:
+        logger.error("excel_export_failed", document_id=str(document_id), error=str(e), exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate Excel export: {e}"
+        ) from e

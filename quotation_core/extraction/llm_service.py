@@ -23,10 +23,10 @@ from tenacity import (
     wait_exponential,
 )
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import get_logger
-from quotation_intelligence.extraction.post_processor import ResponseNormalizer
-from quotation_intelligence.models.extraction import LineItemExtracted, QuotationExtracted
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import get_logger
+from quotation_core.extraction.post_processor import ResponseNormalizer
+from quotation_core.models.extraction import LineItemExtracted, QuotationExtracted
 
 logger = get_logger(__name__)
 
@@ -393,7 +393,6 @@ Call the `structure_quotation` tool with the extracted values.
         if isinstance(parsed, dict) and "arguments" in parsed and "name" in parsed:
             # Safely unwrap if inner arguments are double-stringified
             if isinstance(parsed["arguments"], str):
-                import json
                 try:
                     return json.loads(parsed["arguments"])
                 except json.JSONDecodeError:
@@ -455,7 +454,7 @@ Call the `structure_quotation` tool with the extracted values.
 
         Confidence scores are penalised to reflect lower certainty.
         """
-        from quotation_intelligence.extraction.regex_extractor import RegexExtractor
+        from quotation_core.extraction.regex_extractor import RegexExtractor
 
         extractor = RegexExtractor()
         candidates = extractor.extract(text)

@@ -1,8 +1,8 @@
 """Celery application configuration."""
 from celery import Celery
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import configure_logging
+from quotation_core.core.config import settings
+from quotation_core.core.logging_config import configure_logging
 
 configure_logging()
 
