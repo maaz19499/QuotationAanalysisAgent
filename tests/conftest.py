@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 
-from quotation_intelligence.models.database import Base, Document, ProcessingStatus
+from quotation_extraction.models.database import Base, Document, ProcessingStatus
 
 # Use in-memory SQLite for tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

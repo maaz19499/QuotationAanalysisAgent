@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 """CLI script for processing PDF quotations directly."""
 import argparse
-import asyncio
 import json
 import sys
 from pathlib import Path
 
-from quotation_intelligence.core.config import settings
-from quotation_intelligence.core.logging_config import configure_logging
-from quotation_intelligence.extraction.pipeline import ExtractionPipeline
+from quotation_core.core.logging_config import configure_logging
+from quotation_core.extraction.pipeline import ExtractionPipeline
 
 configure_logging()
 
@@ -16,7 +14,7 @@ configure_logging()
 def main() -> int:
     """Process a PDF file and output structured data."""
     parser = argparse.ArgumentParser(
-        description="Extract structured data from quotation PDFs",
+        description="Extract structured data from quotation PDFs (vision-based)",
     )
     parser.add_argument(
         "input",
@@ -37,16 +35,6 @@ def main() -> int:
         default="pretty",
         help="Output format",
     )
-    parser.add_argument(
-        "--no-llm",
-        action="store_true",
-        help="Skip LLM processing (regex only)",
-    )
-    parser.add_argument(
-        "--no-ocr",
-        action="store_true",
-        help="Disable OCR fallback",
-    )
 
     args = parser.parse_args()
 
@@ -62,10 +50,7 @@ def main() -> int:
 
     # Process
     try:
-        pipeline = ExtractionPipeline(
-            enable_ocr=not args.no_ocr,
-            enable_llm=not args.no_llm,
-        )
+        pipeline = ExtractionPipeline()
 
         result = pipeline.process_sync(str(input_path))
 

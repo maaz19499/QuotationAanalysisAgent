@@ -5,7 +5,7 @@ from uuid import UUID
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from quotation_intelligence.api.main import app
+from quotation_extraction.api.main import app
 
 
 @pytest.fixture

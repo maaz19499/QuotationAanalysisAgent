@@ -31,7 +31,7 @@ test:
 	poetry run pytest -v
 
 test-cov:
-	poetry run pytest --cov=quotation_intelligence --cov-report=html
+	poetry run pytest --cov=quotation_extraction --cov-report=html
 
 test-unit:
 	poetry run pytest tests/unit -v
@@ -41,15 +41,15 @@ test-integration:
 
 # Linting and formatting
 lint:
-	poetry run ruff check quotation_intelligence tests
-	poetry run mypy quotation_intelligence
+	poetry run ruff check quotation_extraction tests
+	poetry run mypy quotation_extraction
 
 format:
-	poetry run black quotation_intelligence tests
-	poetry run ruff check --fix quotation_intelligence tests
+	poetry run black quotation_extraction tests
+	poetry run ruff check --fix quotation_extraction tests
 
 format-check:
-	poetry run black --check quotation_intelligence tests
+	poetry run black --check quotation_extraction tests
 
 # Database
 migrate:
@@ -78,22 +78,22 @@ down:
 
 # Running
 run:
-	poetry run uvicorn quotation_intelligence.api.main:app --reload --host 0.0.0.0 --port 8000
+	poetry run uvicorn quotation_extraction.api.main:app --reload --host 0.0.0.0 --port 8000
 
 run-prod:
-	poetry run gunicorn quotation_intelligence.api.main:app -k uvicorn.workers.UvicornWorker -w 4
+	poetry run gunicorn quotation_extraction.api.main:app -k uvicorn.workers.UvicornWorker -w 4
 
 worker:
-	poetry run celery -A quotation_intelligence.tasks worker --loglevel=info -c 2
+	poetry run celery -A quotation_extraction.tasks worker --loglevel=info -c 2
 
 worker-debug:
-	poetry run celery -A quotation_intelligence.tasks worker --loglevel=debug -c 1
+	poetry run celery -A quotation_extraction.tasks worker --loglevel=debug -c 1
 
 beat:
-	poetry run celery -A quotation_intelligence.tasks beat --loglevel=info
+	poetry run celery -A quotation_extraction.tasks beat --loglevel=info
 
 flower:
-	poetry run celery -A quotation_intelligence.tasks flower --port=5555
+	poetry run celery -A quotation_extraction.tasks flower --port=5555
 
 # Development
 shell:
@@ -118,11 +118,11 @@ docker-build:
 
 # CI targets (for GitHub Actions, etc.)
 ci-test:
-	poetry run pytest --cov=quotation_intelligence --cov-report=xml
+	poetry run pytest --cov=quotation_extraction --cov-report=xml
 
 ci-lint:
-	poetry run ruff check quotation_intelligence tests
-	poetry run mypy quotation_intelligence
+	poetry run ruff check quotation_extraction tests
+	poetry run mypy quotation_extraction
 
 ci-security:
-	poetry run bandit -r quotation_intelligence
+	poetry run bandit -r quotation_extraction

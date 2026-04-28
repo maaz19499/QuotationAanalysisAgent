@@ -1,8 +1,8 @@
 """Tests for post-processing module."""
 import pytest
 
-from quotation_intelligence.extraction.post_processor import PostProcessor
-from quotation_intelligence.models.extraction import LineItemExtracted, QuotationExtracted
+from quotation_extraction.extraction.post_processor import PostProcessor
+from quotation_extraction.models.extraction import LineItemExtracted, QuotationExtracted
 
 
 class TestPostProcessor:

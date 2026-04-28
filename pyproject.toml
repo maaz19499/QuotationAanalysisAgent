@@ -55,7 +55,7 @@ freezegun = "^1.5.1"
 responses = "^0.25.3"
 
 [tool.poetry.scripts]
-quotation-api = "quotation_intelligence.api.main:main"
+quotation-api = "quotation_extraction.api.main:main"
 
 [tool.black]
 line-length = 100
@@ -78,10 +78,10 @@ disallow_untyped_defs = true
 minversion = "8.0"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "-v --cov=quotation_intelligence --cov-report=term-missing"
+addopts = "-v --cov=quotation_extraction --cov-report=term-missing"
 
 [tool.coverage.run]
-source = ["quotation_intelligence"]
+source = ["quotation_extraction"]
 omit = ["*/tests/*", "*/migrations/*"]
 
 [tool.coverage.report]

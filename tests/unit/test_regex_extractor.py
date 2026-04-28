@@ -1,7 +1,7 @@
 """Tests for regex extraction module."""
 import pytest
 
-from quotation_intelligence.extraction.regex_extractor import RegexExtractor
+from quotation_extraction.extraction.regex_extractor import RegexExtractor
 
 
 class TestRegexExtractor:
